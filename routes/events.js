@@ -12,7 +12,7 @@ var EventsModel = require('../models/EventDB');
 //pagination
 router.post('/', function (req, res, next) {
 	console.log("events post");
-	var limit = 5;
+	var limit = 10;
 	var currentPage = 1;
     if(req.params.currentPage){
     	currentPage = req.params.currentPage;
