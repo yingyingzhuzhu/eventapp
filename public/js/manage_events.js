@@ -1,11 +1,17 @@
 //manage_events
 
+//confirm: admin;
+//event already approved
+function confirmEventInDetail(){
+    var confirm = document.getElementById('confirm');
+    confirm.type="submit";
+}
 //revise: admin / users
 function reviseInDetail(){
   if (reviseConfirm()) {
 　　　　　　//删除操作
           var revise = document.getElementById('revise');
-　　　　　　alert("Asked for Revision");
+　　　　　　//alert("Revised");
           revise.type="submit";
 　　　　}
 　　　　else {
@@ -15,7 +21,7 @@ function reviseInDetail(){
 }
 
 function reviseConfirm() {
-　　　　if (window.confirm("Confirm to ask for revision about this event?")) {
+　　　　if (window.confirm("Confirm to revise this event?")) {
 　　　　　　return true;//confirm
 　　　　}
 　　　　else {
@@ -29,7 +35,7 @@ function approveEventInDetail() {
 　　　　if (approveConfirm()) {
 　　　　　　//approve操作
           var approve = document.getElementById('approve');
-　　　　　　alert("Approved");
+　　　　　　//alert("Approved");
           approve.type="submit";
 　　　　}
 　　　　else {
@@ -43,7 +49,7 @@ function approveEvent(index) {
 　　　　if (approveConfirm()) {
 　　　　　　//approve操作
           var approve = document.getElementById('approve_'+index);
-　　　　　　alert("Approved");
+　　　　　　//alert("Approved");
           var id = document.getElementById('id_'+index).innerHTML;
           approve.href = "/manage/events/approve?id="+id;
 　　　　}
@@ -67,7 +73,7 @@ function disapproveEventInDetail() {
   　　　　if (disapproveConfirm()) {
   　　　　　　//删除操作
             var disapprove = document.getElementById('disapprove');
-  　　　　　　alert("Disapproved");
+  　　　　　　//alert("Disapproved");
             disapprove.type="submit";
   　　　　}
   　　　　else {
@@ -82,7 +88,7 @@ function disapproveEventInDetail() {
           var disapprove = document.getElementById('disapprove_'+index);
           var id = document.getElementById('id_'+index).innerHTML;           
 　　　　　　//alert("Disapproved id="+id+", index="+index);
-          alert("Disapproved");
+          //alert("Disapproved");
           disapprove.href = "/manage/events/disapprove?id="+id;
 　　　　}
 　　　　else {
@@ -105,7 +111,7 @@ function deleteEvent(index) {
           var delete_event = document.getElementById('delete_'+index);
           var id = document.getElementById('id_'+index).innerHTML;           
 　　　　　　//alert("Disapproved id="+id+", index="+index);
-          alert("Deleted!");
+          //alert("Deleted!");
           delete_event.href = "/users/deleteEvent?id="+id;
 　　　　}
 　　　　else {

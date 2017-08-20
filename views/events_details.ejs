@@ -127,15 +127,14 @@
         <label>Comments</label>
         <input type="text" name="comments" class="form-control" value="<%= (!!event.comments)?event.comments:'' %>">
         <br> 
-
-        <input id="revise" type="button" class="btn btn-lg btn-primary btn-block btn-warning" name="manage_event_detail" value="revise" onclick="reviseInDetail()">
-        <input id="approve" type="button" class="btn btn-lg btn-primary btn-block btn-success" name="manage_event_detail" value="approve" onclick="approveEventInDetail()">
-        <input id="disapprove" type="button" class="btn btn-lg btn-primary btn-block btn-danger" name="manage_event_detail" value="disapprove" onclick="disapproveEventInDetail()">
+        <% if(event.approved != 1) { %>
+        <input id="revise" type="button" class="btn btn-lg btn-primary btn-block btn-warning" name="manage_event_detail" value="Revise" onclick="reviseInDetail()">
+        <input id="approve" type="button" class="btn btn-lg btn-primary btn-block btn-success" name="manage_event_detail" value="Approve" onclick="approveEventInDetail()">
+        <% } else {%>
+        <input id="confirm" type="button" class="btn btn-lg btn-primary btn-block btn-success" name="manage_event_detail" value="Confirm" onclick="confirmEventInDetail()">
+        <% } %>
+        <input id="disapprove" type="button" class="btn btn-lg btn-primary btn-block btn-danger" name="manage_event_detail" value="Disapprove" onclick="disapproveEventInDetail()">
       </form>
-        <!-- <div class="text-center">
-          <a id="approve_1"><button class="btn btn-lg btn-primary btn-success" onclick="approveEvent(1)">Approve</button></a>
-          <a id="disapprove_1"><button class="btn btn-lg btn-primary btn-danger" onclick="disapproveEvent(1)">Disapprove</button></a>
-        </div> -->
 </div> <!-- /container -->
 
 

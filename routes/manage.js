@@ -236,7 +236,7 @@ router.get('/events/details', ensureLoggedIn('/users/login'), isManager, functio
 
 //edit & approve / disapprove / ask for revision
 router.post('/events/details', ensureLoggedIn('/users/login'), isManager, function(req, res){
-    if(req.body.manage_event_detail == "disapprove"){
+    if(req.body.manage_event_detail == "Disapprove"){
             var id  = req.body.id;
             EventsModel.findByIdAndRemove(ObjectId(id), function(err, event){
                     if(err){
@@ -275,7 +275,7 @@ router.post('/events/details', ensureLoggedIn('/users/login'), isManager, functi
         console.log('keywords is not a string');
     }
 
-    if(req.body.manage_event_detail == "revise"){
+    if(req.body.manage_event_detail == "Revise"){
         
         var approved = 3;//0:not check yet; 1:approve; 2:disapprove; 3.ask for revision
 
@@ -300,18 +300,18 @@ router.post('/events/details', ensureLoggedIn('/users/login'), isManager, functi
             }
         //update
         EventsModel.update({_id:ObjectId(id)}, {$set:newEvent}, function(err, doc){
-        if(err){
-            res.send(err);
-        }
-        else{
-            console.log('ask for revision success!');
-            //success msg
-            //alertUser(newEvent);
-            informUser(req, res, id);
-        }
+            if(err){
+                res.send(err);
+            }
+            else{
+                console.log('ask for revision success!');
+                //success msg
+                //alertUser(newEvent);
+                informUser(req, res, id);//inform auther+flash
+            }
         });
     }
-    else if(req.body.manage_event_detail == "approve"){
+    else if(req.body.manage_event_detail == "Approve"){
         var approved = 1;//0:not check yet; 1:approve; 2:disapprove; 3.ask for revision
 
         var newEvent = {
@@ -341,12 +341,16 @@ router.post('/events/details', ensureLoggedIn('/users/login'), isManager, functi
         else{
             console.log('approve success!');
             //success msg
-            informUser(req, res, id);//inform the auther
+            informUser(req, res, id);//inform the auther+flash
             alertUser(newEvent);//inform all subscribers
         }
         });
     }
-    
+    else if(req.body.manage_event_detail == "Confirm"){
+        req.flash('success', 'Successfully confirm!');
+        res.location('/manage/events');
+        res.redirect('/manage/events');
+    }
 });
 
 //approve an event
@@ -360,8 +364,8 @@ router.get('/events/approve', ensureLoggedIn('/users/login'), isManager, functio
         else {            
             //email alert
             EventsModel.findById(id, function(err, event){
-                informUser(req, res, id);//inform the auther
-                alertUser(req, res, event);
+                informUser(req, res, id);//inform the auther+flash
+                alertUser(event);
                 console.log("approve success!");                      
             });
         }    
@@ -377,6 +381,7 @@ router.get('/events/disapprove', ensureLoggedIn('/users/login'), isManager, func
             res.send(err);
         }
         else {
+            req.flash('success', 'Successfully disapproved!');
             console.log("disapprove success!");
             res.location('/manage/events');
             res.redirect('/manage/events'); 
@@ -412,6 +417,7 @@ router.get('/categories/add', ensureLoggedIn('/users/login'), isAdmin, function(
                 else {
                     // res.send({result:1});
                     console.log("add success!");
+                    req.flash('success', 'Successfully add!');
                     res.location('/manage/categories');
                     res.redirect("/manage/categories");
                     //res.render('manage_categories', {title:'Manage Categories', user: req.user, results : results});
@@ -439,6 +445,7 @@ router.get('/categories/edit', ensureLoggedIn('/users/login'), isAdmin,function(
                 }
                 else {
                     console.log("edit success!");
+                    req.flash('success', 'Successfully edit!');
                     res.location('/manage/categories');
                     res.redirect("/manage/categories");
                     //res.render('manage_categories', {title:'Manage Categories', user: req.user, results : results});
@@ -465,6 +472,7 @@ router.get('/categories/delete', ensureLoggedIn('/users/login'), isAdmin, functi
                     res.send({result:-1});
                 }
                 else {
+                    req.flash('success', 'Successfully delete!');
                     console.log("delete success!");
                     res.location('/manage/categories');
                     res.redirect("/manage/categories");
@@ -612,6 +620,7 @@ function alertUser(newEvent) {
       else{
         var typeStr = {$or: [{'type': type}, {'type': ""}]};
       }
+      console.log(keywords);
       if(keywords.length == 1 && !keywords[0]){
         var keywordsStr = {};
       }
