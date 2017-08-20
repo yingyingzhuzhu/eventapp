@@ -103,7 +103,7 @@ app.use('/search', search);
 app.use('/manage',manage);
 
 app.listen(8080);
-console.log('server started on event.academiacentral.org');
+console.log('server started on 8080');
 
 
 
