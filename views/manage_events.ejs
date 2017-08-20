@@ -65,7 +65,7 @@
 </ul>
 <div class="tab-content">
     <div id="to_be_approved" class="tab-pane fade in active">
-    <%=results1.length%>
+    <%=totallength1%>
     <div class="panel panel-default">
       <table class="table table-striped table-bordered"  border="1px" cellspacing="0">
         <thead>
@@ -79,7 +79,7 @@
           </tr>
         </thead>
         <tbody>
-          <% var index = 1; results1.forEach(function(rs) {%>
+          <% var index = index1; results1.forEach(function(rs) {%>
           <tr>
             <td class="col-xs-1"><%=index%></td>
             <td id="id_<%=index%>" class="hidID"><%=rs._id%></td>
@@ -116,7 +116,7 @@
     </div>
     
     <div id="approved" class="tab-pane fade">
-    <%=results2.length%>
+    <%=totallength2%>
     <div class="panel panel-default">
       <table class="table table-striped table-bordered"  border="1px" cellspacing="0">
         <thead>
@@ -130,7 +130,7 @@
           </tr>
         </thead>
         <tbody>
-          <% var index2 = 1; results2.forEach(function(rs) {%>
+          <% var index2 = index2; results2.forEach(function(rs) {%>
           <tr>
             <td class="col-md-1"><%=index2++%></td>
             <td id="id_<%=index%>" class="hidID"><%=rs._id%></td>
@@ -166,7 +166,7 @@
     </div>
     
     <div id="ask_for_revision" class="tab-pane fade">
-    <%=results3.length%>
+    <%=totallength3%>
     <div class="panel panel-default">
       <table class="table table-striped table-bordered"  border="1px" cellspacing="0">
         <thead>
@@ -180,7 +180,7 @@
           </tr>
         </thead>
         <tbody>
-          <% var index3=1; results3.forEach(function(rs) {%>
+          <% var index3=index3; results3.forEach(function(rs) {%>
           <tr>
             <td class="col-md-1"><%=index3++%></td>
             <td id="id_<%=index%>" class="hidID"><%=rs._id%></td>

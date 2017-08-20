@@ -16,7 +16,7 @@ var ObjectId = require('mongodb').ObjectID;
 var json2csv = require('json2csv');
 var fs = require('fs');
 
-function searchUsers(res, user, limit, currentPage)
+function searchUsers(res, user, limit, currentPage, index)
 {
     UsersModel.find({priority : 0},function(err, users){//usrs
         if(err){
@@ -43,7 +43,7 @@ function searchUsers(res, user, limit, currentPage)
                     return next(err3);
                 }
                     //console.log(results3.length);
-                    res.render('manage_users', { title:'Manage | Manage Users', user:user, 
+                    res.render('manage_users', { title:'Manage | Manage Users', user:user, index:index,
                         users1 : users1, users2 : users2, users3 : users3, totalPage:totalPage, currentPage:currentPage, totallength:totallength}); 
                 }); 
             }); 
@@ -55,13 +55,15 @@ function searchUsers(res, user, limit, currentPage)
 router.get('/users', ensureLoggedIn('/users/login'), isAdmin, function(req, res){
     var limit = 10;
     var currentPage = 1;
+    var index = 1;
     if(req.query.currentPage){
         currentPage = req.query.currentPage;
     }
     if (currentPage < 1) {
         currentPage = 1;
     }
-    searchUsers(res, req.user, limit, currentPage);
+    index = (currentPage - 1) * limit + 1;
+    searchUsers(res, req.user, limit, currentPage, index);
 });
 
 //promote one user to manager
@@ -69,12 +71,13 @@ router.get('/users/promote', ensureLoggedIn('/users/login'), isAdmin, function(r
     var id = req.query.id;
     var limit = 10;
     var currentPage = 1;
+    var index = 1;
     UsersModel.update({_id:ObjectId(id)}, {$set:{priority:1}}, function(err, user){//1 is manager
         if(err){
             res.send(err);
         }
         else {
-            searchUsers(res, req.user, limit, currentPage);
+            searchUsers(res, req.user, limit, currentPage,index);
         }    
     });
 });
@@ -84,12 +87,13 @@ router.get('/users/demote', ensureLoggedIn('/users/login'), isAdmin, function(re
     var id = req.query.id;
     var limit = 10;
     var currentPage = 1;
+    var index = 1;
     UsersModel.update({_id:ObjectId(id)}, {$set:{priority:0}}, function(err, user){//0 is user
         if(err){
             res.send(err);
         }
         else {
-            searchUsers(res, req.user, limit, currentPage);
+            searchUsers(res, req.user, limit, currentPage, index);
         }    
     });
 });
@@ -123,7 +127,7 @@ router.get('/users/download', ensureLoggedIn('/users/login'), isAdmin, function(
 });
 
 //*****************   Events  ********************************
-function searchEvents(res, user, limit, tab, currentPage1,currentPage2,currentPage3)
+function searchEvents(res, user, limit, tab, currentPage1,currentPage2,currentPage3,index1,index2,index3)
 {
     EventsModel.find({approved : 0},function(err1, results1){//to be approve
         if(err1){
@@ -179,7 +183,9 @@ function searchEvents(res, user, limit, tab, currentPage1,currentPage2,currentPa
                                 results1 : results11, results2 : results22, results3 : results33,
                                 totalPage1:totalPage1, totalPage2:totalPage2, totalPage3:totalPage3,
                                 currentPage1:currentPage1,currentPage2:currentPage2,currentPage3:currentPage3, 
-                                totallength1:totallength1,totallength2:totallength2,totallength3:totallength3});                            
+                                totallength1:totallength1,totallength2:totallength2,totallength3:totallength3,
+                                index1:index1,index2:index2,index3:index3
+                            });                            
                         });
                     }); 
                 });
@@ -189,7 +195,10 @@ function searchEvents(res, user, limit, tab, currentPage1,currentPage2,currentPa
 }
 //manage events page - GET
 router.get('/events', ensureLoggedIn('/users/login'), isManager, function(req, res){
-    var limit = 5;
+    var limit = 10;
+    var index1 = 1;
+    var index2 = 1;
+    var index3 = 1;
     var currentPage1 = 1;
     var currentPage2 = 1;
     var currentPage3 = 1;
@@ -212,7 +221,10 @@ router.get('/events', ensureLoggedIn('/users/login'), isManager, function(req, r
     if (currentPage3 < 1) {
         currentPage3 = 1;
     }
-    searchEvents(res, req.user, limit, tab, currentPage1, currentPage2, currentPage3);
+    index1 = (currentPage1 - 1) * limit + 1;
+    index2 = (currentPage2 - 1) * limit + 1;
+    index3 = (currentPage3 - 1) * limit + 1;
+    searchEvents(res, req.user, limit, tab, currentPage1, currentPage2, currentPage3, index1, index2, index3);
 });
 
 
