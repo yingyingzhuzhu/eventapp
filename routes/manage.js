@@ -111,12 +111,13 @@ router.get('/users/download', ensureLoggedIn('/users/login'), isAdmin, function(
         //console.log(results3.length);
         var csv = json2csv({ data: results, fields: fields });
 
-        var path='UsersSubscription'+Date.now()+'.csv';
+        var path='UsersSubscription.csv';
         
         fs.writeFile(path, csv, function(err) {
             if (err) {
                 throw err;
             }
+            res.download(path);
             console.log('File saved');
             //res.download(path);
             req.flash('success', 'Successfully download users\' subscription!');
