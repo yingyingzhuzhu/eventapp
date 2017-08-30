@@ -110,19 +110,35 @@ router.get('/users/download', ensureLoggedIn('/users/login'), isAdmin, function(
         }
         //console.log(results3.length);
         var csv = json2csv({ data: results, fields: fields });
+<<<<<<< HEAD
 
         var path='UsersSubscription'+Date.now()+'.csv';
         //var path='UsersSubscription.csv';
         fs.writeFile(path, csv, function(err) {
+=======
+        var fileName = 'UsersSubscription.csv';
+        
+        fs.writeFile(fileName, csv, function(err) {
+>>>>>>> 3b94578579bb0984d1efe270abfeff28d78ef389
             if (err) {
                 return res.send();
             }
             console.log('File saved');
+<<<<<<< HEAD
             //download file from server to admin local
             res.download('./'+path);
             //req.flash('success', 'Successfully download!');            
             //res.location('/manage/users');
             //res.redirect('/manage/users');           
+=======
+
+            var file = './' + fileName;
+            console.log(fileName);
+            res.download(file);
+            // req.flash('success', 'Successfully download users\' subscription!');
+            // res.location('/manage/users');
+            // res.redirect('/manage/users');
+>>>>>>> 3b94578579bb0984d1efe270abfeff28d78ef389
         });
     }); 
 });
@@ -531,8 +547,6 @@ function informUser(req, res, id) {
     } else {
       var adminPw = results.password;
       var adminEmail = results.account;
-      console.log("adminEmail: " + adminEmail);
-      console.log("admintPw: " + adminPw);
       var server  = email.server.connect({
         user:  adminEmail, 
         password: adminPw,
@@ -548,7 +562,7 @@ function informUser(req, res, id) {
           var message = {
             text:  "Hello " + events.userName + ", you have an event to revise. Please log in your eventapp account " +
              "to get detail information. ",
-            from:  "you <jinhang91@hotmail.com>", 
+            from:  "you <" + adminEmail + ">", 
             to:    events.userName + "<" + events.userEmail + ">",
             cc:    "",
             subject: "testing email js"
@@ -570,8 +584,8 @@ function informUser(req, res, id) {
           var message = {
             text:  "Hello " + events.userName + ", you hava an event approved. You can log in your eventapp account " +
              "to get detail information",
-            from:  "you <jinhang91@hotmail.com>", 
-            to:    "zhuyingcau <" + events.userEmail + ">",
+            from:  "you <" + adminEmail + ">", 
+            to:    events.userName + "<" + events.userEmail + ">",
             cc:    "",
             subject: "testing email js"
           };
@@ -694,8 +708,8 @@ function alertUser(newEvent) {
             "Country: " + country + "\n" + "State: " + state + "\n" + "City: " + city + "\n" + "Date: " +
             startDate + "~" + endDate + "\n" + "Abstract Deadline: " + deadline + "\n" + 
             "Description: " + description + "\n" + "keywords: " + keywords,
-            from:  "you <jinhang91@hotmail.com>", 
-            to:    "zhuyingcau <" + result.userEmail + ">",
+            from:  "you <" + adminEmail + ">", 
+            to:    result.userName + " <" + result.userEmail + ">",
             cc:    "",
             subject: "testing email js"
           };
