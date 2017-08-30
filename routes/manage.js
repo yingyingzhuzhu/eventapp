@@ -111,7 +111,8 @@ router.get('/users/download', ensureLoggedIn('/users/login'), isAdmin, function(
         //console.log(results3.length);
         var csv = json2csv({ data: results, fields: fields });
         var fileName = 'UsersSubscription.csv';
-        
+        //var path='UsersSubscription'+Date.now()+'.csv';
+        //var path='UsersSubscription.csv';
         fs.writeFile(fileName, csv, function(err) {
             if (err) {
                 return res.send();
@@ -119,9 +120,6 @@ router.get('/users/download', ensureLoggedIn('/users/login'), isAdmin, function(
             console.log('File saved');
             //download file from server to admin local
             res.download('./'+fileName);
-            //req.flash('success', 'Successfully download!');            
-            //res.location('/manage/users');
-            //res.redirect('/manage/users');
         });
     }); 
 });
