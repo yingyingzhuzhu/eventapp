@@ -106,22 +106,23 @@ router.get('/users/download', ensureLoggedIn('/users/login'), isAdmin, function(
     //find all subscriptions sorted by userName
     SubsModel.find({}).sort('userName').exec(function(err, results){
         if(err){
-            res.json(err);
+            return res.send();
         }
         //console.log(results3.length);
         var csv = json2csv({ data: results, fields: fields });
 
         var path='UsersSubscription'+Date.now()+'.csv';
-        
+        //var path='UsersSubscription.csv';
         fs.writeFile(path, csv, function(err) {
             if (err) {
-                throw err;
+                return res.send();
             }
             console.log('File saved');
-            //res.download(path);
-            req.flash('success', 'Successfully download users\' subscription!');
-            res.location('/manage/users');
-            res.redirect('/manage/users');
+            //download file from server to admin local
+            res.download('./'+path);
+            //req.flash('success', 'Successfully download!');            
+            //res.location('/manage/users');
+            //res.redirect('/manage/users');           
         });
     }); 
 });
