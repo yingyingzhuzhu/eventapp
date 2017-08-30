@@ -110,35 +110,19 @@ router.get('/users/download', ensureLoggedIn('/users/login'), isAdmin, function(
         }
         //console.log(results3.length);
         var csv = json2csv({ data: results, fields: fields });
-<<<<<<< HEAD
-
-        var path='UsersSubscription'+Date.now()+'.csv';
+        //var path='UsersSubscription'+Date.now()+'.csv';
         //var path='UsersSubscription.csv';
-        fs.writeFile(path, csv, function(err) {
-=======
-        var fileName = 'UsersSubscription.csv';
-        
+        var fileName = 'UsersSubscription.csv';        
         fs.writeFile(fileName, csv, function(err) {
->>>>>>> 3b94578579bb0984d1efe270abfeff28d78ef389
             if (err) {
                 return res.send();
             }
             console.log('File saved');
-<<<<<<< HEAD
             //download file from server to admin local
-            res.download('./'+path);
+            res.download('./'+fileName);
             //req.flash('success', 'Successfully download!');            
             //res.location('/manage/users');
-            //res.redirect('/manage/users');           
-=======
-
-            var file = './' + fileName;
-            console.log(fileName);
-            res.download(file);
-            // req.flash('success', 'Successfully download users\' subscription!');
-            // res.location('/manage/users');
-            // res.redirect('/manage/users');
->>>>>>> 3b94578579bb0984d1efe270abfeff28d78ef389
+            //res.redirect('/manage/users'); 
         });
     }); 
 });
