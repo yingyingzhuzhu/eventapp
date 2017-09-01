@@ -9,6 +9,7 @@ var SubsModel = require('../models/SubDB');
 var AlertsModel = require('../models/AlertDB');
 var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 var email   = require('emailjs/email');
+var nodemailer = require('nodemailer'); 
 
 var ObjectId = require('mongodb').ObjectID;
 
@@ -532,12 +533,21 @@ function informUser(req, res, id) {
     } else {
       var adminPw = results.password;
       var adminEmail = results.account;
+      console.log('password: ' + adminPw);
+      console.log('email: ' + adminEmail);
       var server  = email.server.connect({
         user:  adminEmail, 
         password: adminPw,
         host:  "smtp-mail.outlook.com", 
         tls: {ciphers: "SSLv3"}
       });
+      // var transporter = nodemailer.createTransport(smtpConfig);
+      // var server  = email.server.connect({
+      //   host: "smtp.academiacentral.org",
+      //   port: 465,
+      //   auth: {user: adminEmail, password: adminPw},
+      //   ssl: true     
+      // });
 
       EventsModel.findById(id, function(err, events){
         if(err) {
@@ -550,7 +560,7 @@ function informUser(req, res, id) {
             from:  "you <" + adminEmail + ">", 
             to:    events.userName + "<" + events.userEmail + ">",
             cc:    "",
-            subject: "testing email js"
+            subject: "infromation from academiacentral(do not reply)"
           };
 
           server.send(message, function(err, message) {
@@ -575,7 +585,7 @@ function informUser(req, res, id) {
             subject: "testing email js"
           };
 
-          server.send(message, function(err, message) {
+          transporter.sendMail(message, function(err, message) {
             if (err) {
               console.log(err);
             }
