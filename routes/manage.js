@@ -110,7 +110,7 @@ router.get('/users/download', ensureLoggedIn('/users/login'), isAdmin, function(
         }
         //console.log(results3.length);
         var csv = json2csv({ data: results, fields: fields });
-        var fileName = 'UsersSubscription.csv';
+        var fileName = 'UsersEventsSubscription.csv';
         
         fs.writeFile(fileName, csv, function(err) {
             if (err) {
