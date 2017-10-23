@@ -111,9 +111,9 @@ router.get('/users/download', ensureLoggedIn('/users/login'), isAdmin, function(
         }
         //console.log(results3.length);
         var csv = json2csv({ data: results, fields: fields });
-        var fileName = 'UsersSubscription.csv';
-        //var path='UsersSubscription'+Date.now()+'.csv';
-        //var path='UsersSubscription.csv';
+
+        var fileName = 'UsersEventsSubscription.csv';
+
         fs.writeFile(fileName, csv, function(err) {
             if (err) {
                 return res.send();
@@ -534,7 +534,7 @@ function informUser(req, res, id) {
       var server  = email.server.connect({
         user:  adminEmail, 
         password: adminPw,
-        host:  "smtp-mail.outlook.com", 
+        host:  "academiacentral.org", 
         tls: {ciphers: "SSLv3"}
       });
       // var transporter = nodemailer.createTransport(smtpConfig);
@@ -552,11 +552,13 @@ function informUser(req, res, id) {
         if(events.approved == 3) { //revise
           var message = {
             text:  "Hello " + events.userName + ", you have an event to revise. Please log in your eventapp account " +
-             "to get detail information. ",
-            from:  "you <" + adminEmail + ">", 
+             "to get detail information. "
+             + "\n\n\n" + "Regards," + "\n" + "event.academiacentral.org",
+            from:  "event.academiacentral.org <" + adminEmail + ">", 
             to:    events.userName + "<" + events.userEmail + ">",
             cc:    "",
-            subject: "infromation from academiacentral(do not reply)"
+
+            subject: "Revision Request"
           };
 
           server.send(message, function(err, message) {
@@ -574,11 +576,12 @@ function informUser(req, res, id) {
         else if(events.approved == 1) { //approved
           var message = {
             text:  "Hello " + events.userName + ", you hava an event approved. You can log in your eventapp account " +
-             "to get detail information",
-            from:  "you <" + adminEmail + ">", 
+             "to get detail information." 
+             + "\n\n\n" + "Regards," + "\n" + "event.academiacentral.org",
+            from:  "event.academiacentral.org <" + adminEmail + ">", 
             to:    events.userName + "<" + events.userEmail + ">",
             cc:    "",
-            subject: "testing email js"
+            subject: "Event Approved"
           };
 
           transporter.sendMail(message, function(err, message) {
@@ -688,7 +691,7 @@ function alertUser(newEvent) {
         var server  = email.server.connect({
           user:  adminEmail, 
           password: adminPw,
-          host:  "smtp-mail.outlook.com", 
+          host:  "academiacentral.org", 
           tls: {ciphers: "SSLv3"}
         });
         results.forEach(function(result){
@@ -698,11 +701,12 @@ function alertUser(newEvent) {
             "Event name: " + name + "\n" + "Event type: " + type + "\n" + "Region: " + region + "\n" +
             "Country: " + country + "\n" + "State: " + state + "\n" + "City: " + city + "\n" + "Date: " +
             startDate + "~" + endDate + "\n" + "Abstract Deadline: " + deadline + "\n" + 
-            "Description: " + description + "\n" + "keywords: " + keywords,
-            from:  "you <" + adminEmail + ">", 
+            "Description: " + description + "\n" + "keywords: " + keywords 
+            + "\n\n\n" + "Regards," + "\n" + "event.academiacentral.org",
+            from:  "event.academiacentral.org <" + adminEmail + ">", 
             to:    result.userName + " <" + result.userEmail + ">",
             cc:    "",
-            subject: "testing email js"
+            subject: "Event Subscription Alert"
           };
 
           // send the message and get a callback with an error or details of the message that was sent

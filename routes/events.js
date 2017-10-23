@@ -22,6 +22,7 @@ router.post('/', function (req, res, next) {
     }
 	var type = req.body.type;
 	var keywords = req.body.keywords.split(',');
+	var region = req.body.region;
 	var country = req.body.country;
 	var state = req.body.state;
 	var startDate = req.body.startDate;
@@ -32,7 +33,7 @@ router.post('/', function (req, res, next) {
 
 	//search
 	searchEvents(res, req.user, limit, currentPage, type, 
-		keywords, country, state, startDate, endDate, approved);	
+		keywords, region, country, state, startDate, endDate, approved);	
 
 });
 
@@ -51,6 +52,7 @@ router.get( "/" , function ( req , res , err ) {
 	//use trim() to delete space
 	var type = req.query.type.trim();
 	var keywords = req.query.keywords.trim().split(',');
+	var region = req.query.region.trim();
 	var country = req.query.country.trim();
 	var state = req.query.state.trim();
 	var startDate = req.query.startDate.trim();
@@ -60,11 +62,11 @@ router.get( "/" , function ( req , res , err ) {
 	deleteOutDateEvents(startDate);
 	//search
 	searchEvents(res, req.user, limit, currentPage, type, keywords, 
-		country, state, startDate, endDate, approved);	
+		region, country, state, startDate, endDate, approved);	
 });
 
 
-function searchEvents(res, user, limit, currentPage, type, keywords, country, state, startDate, endDate, approved)
+function searchEvents(res, user, limit, currentPage, type, keywords, region, country, state, startDate, endDate, approved)
 {//search
 	if(!type){
 		var typeStr = {};
@@ -78,6 +80,12 @@ function searchEvents(res, user, limit, currentPage, type, keywords, country, st
 	else{
 		//var keywordsStr = {'keywords': {$in:keywords}};//or
 		var keywordsStr = {'keywords': {$all:keywords}};//and
+	}
+	if(!region){
+		var regionStr = {};
+	}
+	else{
+		var regionStr = {'region' : region};
 	}
 	if(!country){
 		var countryStr = {};
@@ -105,7 +113,7 @@ function searchEvents(res, user, limit, currentPage, type, keywords, country, st
 	}
 	var approvedStr = {'approved' : 1};
 
-    EventsModel.find({$and: [typeStr, keywordsStr, countryStr, stateStr, startDateStr, endDateStr, approvedStr]}, function(err, rs){
+    EventsModel.find({$and: [typeStr, keywordsStr, regionStr, countryStr, stateStr, startDateStr, endDateStr, approvedStr]}, function(err, rs){
     	if (err) {
             res.send(err);
         } else{
@@ -118,13 +126,13 @@ function searchEvents(res, user, limit, currentPage, type, keywords, country, st
             if (totalPage != 0 && currentPage > totalPage) {
                 currentPage = totalPage;
             }
-            var query = EventsModel.find({$and: [typeStr, keywordsStr, countryStr, stateStr, startDateStr, endDateStr, approvedStr]});
+            var query = EventsModel.find({$and: [typeStr, keywordsStr, regionStr, countryStr, stateStr, startDateStr, endDateStr, approvedStr]});
             query.skip((currentPage - 1) * limit);
             query.limit(limit);
             query.sort('-startDate').exec(function(err, results) { 
             	res.render('events', {title:'Search Results', 
             		type:type, keywords:keywords, 
-            		country:country, state:state, 
+            		region:region, country:country, state:state, 
             		startDate:startDate, endDate:endDate, 
             		totalPage:totalPage, currentPage:currentPage, 
             		results:results, totallength:totallength, user: user});
