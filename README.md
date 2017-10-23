@@ -1,14 +1,40 @@
 # eventapp
 
-This is a web application used HTML/CSS, javaScript, Node.js, Express.js, MongoDB, mongoose.
+## front end
+CSS/HTML, Bootstrap, javascript
 
-User function includes
+## back end
+Node.js, Express.js, mongoose
+
+## database
+MongoDB
+
+## User function
 Register,
 Login,
 Profile,
 Edit profile,
 Change password,
-add event,
 my event,
+add event,
 edit event,
-search event
+search event,
+my subscription,
+subscribe,
+email alert,
+edit subscription
+
+## Admin function
+promote user to manager,
+demote manager to user,
+approve event,
+revise event,
+disapprove event
+add event type
+
+## manager function
+approve event,
+revise event,
+disapprove event
+add event type
+
