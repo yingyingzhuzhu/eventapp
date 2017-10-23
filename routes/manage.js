@@ -9,6 +9,7 @@ var SubsModel = require('../models/SubDB');
 var AlertsModel = require('../models/AlertDB');
 var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 var email   = require('emailjs/email');
+var nodemailer = require('nodemailer'); 
 
 var ObjectId = require('mongodb').ObjectID;
 
@@ -110,8 +111,9 @@ router.get('/users/download', ensureLoggedIn('/users/login'), isAdmin, function(
         }
         //console.log(results3.length);
         var csv = json2csv({ data: results, fields: fields });
+
         var fileName = 'UsersEventsSubscription.csv';
-        
+
         fs.writeFile(fileName, csv, function(err) {
             if (err) {
                 return res.send();
@@ -119,9 +121,6 @@ router.get('/users/download', ensureLoggedIn('/users/login'), isAdmin, function(
             console.log('File saved');
             //download file from server to admin local
             res.download('./'+fileName);
-            //req.flash('success', 'Successfully download!');            
-            //res.location('/manage/users');
-            //res.redirect('/manage/users');
         });
     }); 
 });
@@ -530,12 +529,21 @@ function informUser(req, res, id) {
     } else {
       var adminPw = results.password;
       var adminEmail = results.account;
+      console.log('password: ' + adminPw);
+      console.log('email: ' + adminEmail);
       var server  = email.server.connect({
         user:  adminEmail, 
         password: adminPw,
         host:  "academiacentral.org", 
         tls: {ciphers: "SSLv3"}
       });
+      // var transporter = nodemailer.createTransport(smtpConfig);
+      // var server  = email.server.connect({
+      //   host: "smtp.academiacentral.org",
+      //   port: 465,
+      //   auth: {user: adminEmail, password: adminPw},
+      //   ssl: true     
+      // });
 
       EventsModel.findById(id, function(err, events){
         if(err) {
@@ -549,6 +557,7 @@ function informUser(req, res, id) {
             from:  "event.academiacentral.org <" + adminEmail + ">", 
             to:    events.userName + "<" + events.userEmail + ">",
             cc:    "",
+
             subject: "Revision Request"
           };
 
@@ -575,7 +584,7 @@ function informUser(req, res, id) {
             subject: "Event Approved"
           };
 
-          server.send(message, function(err, message) {
+          transporter.sendMail(message, function(err, message) {
             if (err) {
               console.log(err);
             }
