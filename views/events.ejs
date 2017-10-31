@@ -57,7 +57,31 @@
 <p>Click on "[+] More info" to show more details.</p>
 <p>Click on "[-] Less info" to show less details.</p>
 <p>----------------------------------------------------------------</p>
+<li>
+  <strong>EVENT TYPE:</strong>
+  <%if(type != ""){%>
+      <%=type%><a href="?keywords=<%=keywords%>
+        &&region=<%=region%>
+        &&country=<%=country%>
+        &&state=<%=state%>
+        &&startDate=<%=startDate%>
+        &&endDate=<%=endDate%>
+        &&currentPage=1">  X</a>
+  <%}else{%>
+    <%typeResults.forEach(function(typeResult){%>
+    <a href="?type=<%=typeResult.type%>
+        &&keywords=<%=keywords%>
+        &&region=<%=region%>
+        &&country=<%=country%>
+        &&state=<%=state%>
+        &&startDate=<%=startDate%>
+        &&endDate=<%=endDate%>
+        &&currentPage=1"><%=typeResult.type%>  |  </a>
+    <%})%>
+  <%}%>
 
+</li>
+<p>----------------------------------------------------------------</p>
 <% results.forEach(function(result){ %>
   <p class="adv-toggle-buttons">
     <span><%=result.startDate%>~<%=result.endDate%>, <%=result.name%>, <%=result.city%>,<%=result.state%>,<%=result.country%>,<%=result.region%>. </span><a href="#">[+] More info</a><a href="#" style="display: none;">[-] Less info</a>

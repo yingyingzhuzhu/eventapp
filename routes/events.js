@@ -8,11 +8,13 @@ var mongojs = require('mongojs');
 var db = mongojs('eventapp', ['users','events','types','subs']);
 //###########mongoose#########
 var EventsModel = require('../models/EventDB');
+var TypesModel = require('../models/TypeDB');
+
 //Events - POST
 //pagination
 router.post('/', function (req, res, next) {
 	console.log("events post");
-	var limit = 10;
+	var limit = 8;
 	var currentPage = 1;
     if(req.params.currentPage){
     	currentPage = req.params.currentPage;
@@ -41,7 +43,7 @@ router.post('/', function (req, res, next) {
 //pagination
 router.get( "/" , function ( req , res , err ) {
 	//console.log("events get");
-    var limit = 10;
+    var limit = 8;
     var currentPage = 1;
     if(req.query.currentPage){
     	currentPage = req.query.currentPage;
@@ -50,7 +52,12 @@ router.get( "/" , function ( req , res , err ) {
         currentPage = 1;
     }
 	//use trim() to delete space
-	var type = req.query.type.trim();
+	if(req.query.type != null){
+		var type = req.query.type.trim();
+	}
+	else{
+		var type = "";
+	}
 	var keywords = req.query.keywords.trim().split(',');
 	var region = req.query.region.trim();
 	var country = req.query.country.trim();
@@ -130,12 +137,17 @@ function searchEvents(res, user, limit, currentPage, type, keywords, region, cou
             query.skip((currentPage - 1) * limit);
             query.limit(limit);
             query.sort('-startDate').exec(function(err, results) { 
-            	res.render('events', {title:'Search Results', 
-            		type:type, keywords:keywords, 
+            	TypesModel.find({}, function(err, typeResults){
+					if (err) {
+			    		console.dir( err );
+			    	}
+					res.render('events', {title:'Search Results', 
+            		typeResults: typeResults, type:type, keywords:keywords, 
             		region:region, country:country, state:state, 
             		startDate:startDate, endDate:endDate, 
             		totalPage:totalPage, currentPage:currentPage, 
             		results:results, totallength:totallength, user: user});
+				});
             });
         } 
 	});
