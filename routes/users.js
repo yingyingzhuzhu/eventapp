@@ -146,7 +146,7 @@ router.post('/addEvent', function(req, res){
 	var userName = req.user.name;
 	var userEmail = req.user.email;
 	var today = new Date();
-	today.setDate(today.getDate() - 7);
+	today.setDate(today.getDate());
 
 
 

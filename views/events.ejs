@@ -66,6 +66,7 @@
         &&state=<%=state%>
         &&startDate=<%=startDate%>
         &&endDate=<%=endDate%>
+        &&datePosted=<%=datePosted%>
         &&currentPage=1">  X</a>
   <%}else{%>
     <%typeResults.forEach(function(typeResult){%>
@@ -76,15 +77,75 @@
         &&state=<%=state%>
         &&startDate=<%=startDate%>
         &&endDate=<%=endDate%>
+        &&datePosted=<%=datePosted%>
         &&currentPage=1"><%=typeResult.type%>  |  </a>
     <%})%>
   <%}%>
 
 </li>
+<li>
+  <strong>DATE POSTED:</strong>
+    <%if(datePosted != ""){%>
+        <%if(datePosted == 0){%>
+          Today
+        <%}else if(datePosted == 7){%>
+          Last 7 days
+        <%}else if(datePosted == 14){%>
+          Last 14 days
+        <%}else{%>
+          Last 30 days
+        <%}%>
+        <a href="?type=<%=type%>
+          &&keywords=<%=keywords%>
+          &&region=<%=region%>
+          &&country=<%=country%>
+          &&state=<%=state%>
+          &&startDate=<%=startDate%>
+          &&endDate=<%=endDate%>
+          &&currentPage=1">  X</a>
+    <%}else{%>
+      <a href="?type=<%=type%>
+          &&keywords=<%=keywords%>
+          &&region=<%=region%>
+          &&country=<%=country%>
+          &&state=<%=state%>
+          &&startDate=<%=startDate%>
+          &&endDate=<%=endDate%>
+          &&datePosted=0
+          &&currentPage=1">Today |</a>
+          <a href="?type=<%=type%>
+          &&keywords=<%=keywords%>
+          &&region=<%=region%>
+          &&country=<%=country%>
+          &&state=<%=state%>
+          &&startDate=<%=startDate%>
+          &&endDate=<%=endDate%>
+          &&datePosted=7
+          &&currentPage=1">Last 7 days |</a>
+          <a href="?type=<%=type%>
+          &&keywords=<%=keywords%>
+          &&region=<%=region%>
+          &&country=<%=country%>
+          &&state=<%=state%>
+          &&startDate=<%=startDate%>
+          &&endDate=<%=endDate%>
+          &&datePosted=14
+          &&currentPage=1">Last 14 days |</a>
+          <a href="?type=<%=type%>
+          &&keywords=<%=keywords%>
+          &&region=<%=region%>
+          &&country=<%=country%>
+          &&state=<%=state%>
+          &&startDate=<%=startDate%>
+          &&endDate=<%=endDate%>
+          &&datePosted=30
+          &&currentPage=1">Last 30 days  |</a>
+    <%}%>
+</li>
 <p>----------------------------------------------------------------</p>
 <% results.forEach(function(result){ %>
   <p class="adv-toggle-buttons">
-    <span><%=result.startDate%>~<%=result.endDate%>, <%=result.name%>, <%=result.city%>,<%=result.state%>,<%=result.country%>,<%=result.region%>. </span><a href="#">[+] More info</a><a href="#" style="display: none;">[-] Less info</a>
+    <span><%=result.startDate%>~<%=result.endDate%>, <%=result.name%>, <%=result.city%>,<%=result.state%>,<%=result.country%>,<%=result.region%>. (Posted <%=result.postDate%>)</span><a href="#">  [+] More info</a><a href="#" style="display: none;">  [-] Less info</a>
   </p>
   <div class="adv-unit-options" style="display: none;">
     <ul>
@@ -108,6 +169,7 @@
         &&state=<%=state%>
         &&startDate=<%=startDate%>
         &&endDate=<%=endDate%>
+        &&datePosted=<%=datePosted%>
         &&currentPage=1">&laquo;</a></li>
   <% if(totalPage == 0){ %>
     <li class="active"><a href="?type=<%=type%>
@@ -117,6 +179,7 @@
         &&state=<%=state%>
         &&startDate=<%=startDate%>
         &&endDate=<%=endDate%>
+        &&datePosted=<%=datePosted%>
         &&currentPage=1">1</a></li>
   <% } %>
   <% for(var j = 1; j <= totalPage; j ++){ %>
@@ -133,6 +196,7 @@
         &&state=<%=state%>
         &&startDate=<%=startDate%>
         &&endDate=<%=endDate%>
+        &&datePosted=<%=datePosted%>
         &&currentPage=<%=j%>"><%=j%></a></li>     
   <% } %>
   <li><a href="?type=<%=type%>
@@ -142,6 +206,7 @@
         &&state=<%=state%>
         &&startDate=<%=startDate%>
         &&endDate=<%=endDate%>
+        &&datePosted=<%=datePosted%>
         &&currentPage=<%=totalPage%>">&raquo;</a></li> 
   </ul>
 </div>

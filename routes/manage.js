@@ -194,6 +194,9 @@ function searchEvents(res, user, limit, tab, currentPage1,currentPage2,currentPa
 }
 //manage events page - GET
 router.get('/events', ensureLoggedIn('/users/login'), isManager, function(req, res){
+    //delete out-of-date events
+    deleteOutDateEvents();
+
     var limit = 10;
     var index1 = 1;
     var index2 = 1;
@@ -248,128 +251,167 @@ router.get('/events/details', ensureLoggedIn('/users/login'), isManager, functio
 //edit & approve / disapprove / ask for revision
 router.post('/events/details', ensureLoggedIn('/users/login'), isManager, function(req, res){
     if(req.body.manage_event_detail == "Disapprove"){
-        var id  = req.body.id;
-        EventsModel.findByIdAndRemove(ObjectId(id), function(err, event){
-            if(err){
-                res.send(err);
-            }
-            else {
-                console.log("disapprove success!");
-                req.flash('success', 'Successfully disapproved!');
-                res.location('/manage/events');
-                res.redirect('/manage/events');
-                //searchEvents(res, req.user, limit, currentPage, 0, false);
-            }    
-        });
-    }
-    //get form values
-    var id        = req.body.id;
-    var name        = req.body.name;
-    var type        = req.body.type;
-    var city    = req.body.city;
-    var state   = req.body.state;
-    var country     = req.body.country;
-    var region      = req.body.region;
-    var organization    = req.body.organization;
-    var contact     = req.body.contact;
-    var email   = req.body.email;
-    var website     = req.body.website;
-    var startDate   = req.body.startDate;
-    var endDate = req.body.endDate;
-    var deadline = req.body.deadline;
-    var description = req.body.description;
-    var comments = req.body.comments;
-    if(typeof req.body.keywords == 'string') {
-        var keywords    = req.body.keywords.split(",");
-    } else {
-        var keywords = null;
-        console.log('keywords is not a string');
-    }
 
-    if(req.body.manage_event_detail == "Revise"){
-        
-        var approved = 3;//0:not check yet; 1:approve; 2:disapprove; 3.ask for revision
+            var id  = req.body.id;
+            EventsModel.findByIdAndRemove(ObjectId(id), function(err, event){
+                    if(err){
+                        res.send(err);
+                    }
+                    else {
+                        console.log("disapprove success!");
+                        req.flash('success', 'Successfully disapproved!');
+                        res.location('/manage/events');
+                        res.redirect('/manage/events');
+                        //searchEvents(res, req.user, limit, currentPage, 0, false);
+                    }    
+                });
+    }else{
+        //get form values
+        var id        = req.body.id;
+        var name        = req.body.name;
+        var type        = req.body.type;
+        var city    = req.body.city;
+        var state   = req.body.state;
+        var country     = req.body.country;
+        var region      = req.body.region;
+        var organization    = req.body.organization;
+        var contact     = req.body.contact;
+        var email   = req.body.email;
+        var website     = req.body.website;
+        var startDate   = req.body.startDate;
+        var endDate = req.body.endDate;
+        var deadline = req.body.deadline;
+        var description = req.body.description;
+        var comments = req.body.comments;
+        if(typeof req.body.keywords == 'string') {
+            var keywords    = req.body.keywords.split(",");
+        } else {
+            var keywords = null;
+            console.log('keywords is not a string');
+        }
 
-        var newEvent = {
-                   name: name,
-                   type: type,
-                   region: region,//continent
-                   country: country,
-                   state: state,
-                   city: city,
-                   organization: organization,
-                   contact: contact,
-                   email: email,
-                   website: website,
-                   startDate: startDate,
-                   endDate: endDate,
-                   deadline: deadline,
-                   description: description,
-                   keywords: keywords,
-                   approved: approved,
-                   comments: comments
-            }
-        //update
-        EventsModel.update({_id:ObjectId(id)}, {$set:newEvent}, function(err, doc){
-            if(err){
-                console.log(err);
-            }
-            else{
-                console.log('ask for revision success!');
-                informUser(req, res, id);
-                res.location('/manage/events');
-                res.redirect('/manage/events');                
-            }
-        });
-    }
-    else if(req.body.manage_event_detail == "Approve"){
-        var approved = 1;//0:not check yet; 1:approve; 2:disapprove; 3.ask for revision
 
-        var newEvent = {
-                   name: name,
-                   type: type,
-                   region: region,//continent
-                   country: country,
-                   state: state,
-                   city: city,
-                   organization: organization,
-                   contact: contact,
-                   email: email,
-                   website: website,
-                   startDate: startDate,
-                   endDate: endDate,
-                   deadline: deadline,
-                   description: description,
-                   keywords: keywords,
-                   approved: approved,
-                   comments: comments,
-            }
-        //update
-        EventsModel.update({_id:ObjectId(id)}, {$set: newEvent}, function(err, doc){
+        if(req.body.manage_event_detail == "Revise"){
+            
+            var approved = 3;//0:not check yet; 1:approve; 2:disapprove; 3.ask for revision
+
+            var newEvent = {
+                       name: name,
+                       type: type,
+                       region: region,//continent
+                       country: country,
+                       state: state,
+                       city: city,
+                       organization: organization,
+                       contact: contact,
+                       email: email,
+                       website: website,
+                       startDate: startDate,
+                       endDate: endDate,
+                       deadline: deadline,
+                       description: description,
+                       keywords: keywords,
+                       approved: approved,
+                       comments: comments
+                }
+            //update
+            EventsModel.update({_id:ObjectId(id)}, {$set:newEvent}, function(err, doc){
+                if(err){
+                    res.send(err);
+                }
+                else{
+                    console.log('ask for revision success!');
+                    //success msg
+                    //alertUser(newEvent);
+                    informUser(req, res, id);//inform auther+flash
+                    res.location('/manage/events');
+                    res.redirect('/manage/events');
+                }
+            });
+        }
+        else if(req.body.manage_event_detail == "Approve"){
+            var approved = 1;//0:not check yet; 1:approve; 2:disapprove; 3.ask for revision
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth()+1; //January is 0!
+            var yyyy = today.getFullYear();
+
+            if(dd<10) {
+                dd = '0'+dd
+            } 
+
+            if(mm<10) {
+                mm = '0'+mm
+            } 
+
+            today = yyyy + '-' + mm + '-' + dd;
+            var newEvent = {
+                       name: name,
+                       type: type,
+                       region: region,//continent
+                       country: country,
+                       state: state,
+                       city: city,
+                       organization: organization,
+                       contact: contact,
+                       email: email,
+                       website: website,
+                       startDate: startDate,
+                       endDate: endDate,
+                       deadline: deadline,
+                       description: description,
+                       keywords: keywords,
+                       approved: approved,
+                       postDate: today,
+                       comments: comments,
+                }
+            //update
+            EventsModel.update({_id:ObjectId(id)}, {$set: newEvent}, function(err, doc){
             if(err){
                 console.log(err);
             }
             else{
                 console.log('approve success!');
-                informUser(req, res, id);
-                alertUser(event);
+                //success msg
+                informUser(req, res, id);//inform the auther+flash
+                alertUser(newEvent);//inform all subscribers
                 res.location('/manage/events');
-                res.redirect('/manage/events');                
+                res.redirect('/manage/events');
             }
-        });
-    }
-    else if(req.body.manage_event_detail == "Confirm"){
-        req.flash('success', 'Successfully confirm!');
-        res.location('/manage/events');
-        res.redirect('/manage/events');
+            });
+        }
+        else if(req.body.manage_event_detail == "Confirm"){
+            req.flash('success', 'Successfully confirm!');
+            res.location('/manage/events');
+            res.redirect('/manage/events');
+        }
     }
 });
 
 //approve an event
 router.get('/events/approve', ensureLoggedIn('/users/login'), isManager, function(req, res){
     var id = req.query.id;
+    var approved = 1;
     //console.log("in the approve function， id="+id);
-    EventsModel.update({_id:ObjectId(id)}, {$set:{approved:1}}, function(err, event){
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; //January is 0!
+    var yyyy = today.getFullYear();
+
+    if(dd<10) {
+        dd = '0'+dd
+    } 
+
+    if(mm<10) {
+        mm = '0'+mm
+    } 
+
+    today = yyyy + '-' + mm + '-' + dd;
+    var newEvent = {
+           approved: approved,
+           postDate: today
+    }
+    EventsModel.update({_id:ObjectId(id)}, {$set: newEvent}, function(err, event){
         if(err){
             console.log(err);
         }
@@ -523,6 +565,7 @@ function isManager(req, res, next) {
 };
 
 function informUser(req, res, id) {
+
     console.log("inform user");
     AlertsModel.findOne(function(err, results){
         if(err) {
@@ -716,7 +759,40 @@ function alertUser(newEvent) {
         }
     });
 }
+//change approved of out-of-date events to 5
+function deleteOutDateEvents()
+{
+    //delete out-of-date events
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; //January is 0!
+    var yyyy = today.getFullYear();
 
+    if(dd<10) {
+        dd = '0'+dd
+    } 
+
+    if(mm<10) {
+        mm = '0'+mm
+    } 
+
+    today =  yyyy + '-' + mm + '-' + dd;
+    //console.log(today);
+    EventsModel.find({$and:[{'endDate': {$lt:today}},{'approved':{$ne:5}}]}, function(err, results){
+        if(results.length > 0){
+            EventsModel.update({$and:[{'endDate': {$lt:today}},{'approved':{$ne:5}}]}, {$set: {'approved':5}}, function(err, doc){
+            if(err){
+                res.send(err);
+            }
+            else{
+                console.log('out-of-date event!');
+            }
+        });
+        }
+    });
+    
+    //EventsModel.remove({'startDate': {$lt:today}})
+}
 
 
 module.exports = router;
