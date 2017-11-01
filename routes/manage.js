@@ -248,19 +248,19 @@ router.get('/events/details', ensureLoggedIn('/users/login'), isManager, functio
 //edit & approve / disapprove / ask for revision
 router.post('/events/details', ensureLoggedIn('/users/login'), isManager, function(req, res){
     if(req.body.manage_event_detail == "Disapprove"){
-            var id  = req.body.id;
-            EventsModel.findByIdAndRemove(ObjectId(id), function(err, event){
-                    if(err){
-                        res.send(err);
-                    }
-                    else {
-                        console.log("disapprove success!");
-                        req.flash('success', 'Successfully disapproved!');
-                        res.location('/manage/events');
-                        res.redirect('/manage/events');
-                        //searchEvents(res, req.user, limit, currentPage, 0, false);
-                    }    
-                });
+        var id  = req.body.id;
+        EventsModel.findByIdAndRemove(ObjectId(id), function(err, event){
+            if(err){
+                res.send(err);
+            }
+            else {
+                console.log("disapprove success!");
+                req.flash('success', 'Successfully disapproved!');
+                res.location('/manage/events');
+                res.redirect('/manage/events');
+                //searchEvents(res, req.user, limit, currentPage, 0, false);
+            }    
+        });
     }
     //get form values
     var id        = req.body.id;
@@ -312,13 +312,13 @@ router.post('/events/details', ensureLoggedIn('/users/login'), isManager, functi
         //update
         EventsModel.update({_id:ObjectId(id)}, {$set:newEvent}, function(err, doc){
             if(err){
-                res.send(err);
+                console.log(err);
             }
             else{
                 console.log('ask for revision success!');
-                //success msg
-                //alertUser(newEvent);
-                informUser(req, res, id);//inform auther+flash
+                informUser(req, res, id);
+                res.location('/manage/events');
+                res.redirect('/manage/events');                
             }
         });
     }
@@ -346,15 +346,16 @@ router.post('/events/details', ensureLoggedIn('/users/login'), isManager, functi
             }
         //update
         EventsModel.update({_id:ObjectId(id)}, {$set: newEvent}, function(err, doc){
-        if(err){
-            res.send(err);
-        }
-        else{
-            console.log('approve success!');
-            //success msg
-            informUser(req, res, id);//inform the auther+flash
-            alertUser(newEvent);//inform all subscribers
-        }
+            if(err){
+                console.log(err);
+            }
+            else{
+                console.log('approve success!');
+                informUser(req, res, id);
+                alertUser(event);
+                res.location('/manage/events');
+                res.redirect('/manage/events');                
+            }
         });
     }
     else if(req.body.manage_event_detail == "Confirm"){
@@ -370,15 +371,20 @@ router.get('/events/approve', ensureLoggedIn('/users/login'), isManager, functio
     //console.log("in the approve function， id="+id);
     EventsModel.update({_id:ObjectId(id)}, {$set:{approved:1}}, function(err, event){
         if(err){
-            res.send(err);
+            console.log(err);
         }
         else {            
             //email alert
             EventsModel.findById(id, function(err, event){
-                informUser(req, res, id);//inform the auther+flash
-                alertUser(event);
-                console.log("approve success!");                      
-            });
+                if (err) {
+                    console.log(err);
+                } else {
+                    informUser(req, res, id);
+                    alertUser(event);
+                    res.location('/manage/events');
+                    res.redirect('/manage/events');
+                }
+            });                   
         }    
     });
 });
@@ -389,7 +395,7 @@ router.get('/events/disapprove', ensureLoggedIn('/users/login'), isManager, func
     //console.log(id);
     EventsModel.findByIdAndRemove(ObjectId(id), function(err, event){
         if(err){
-            res.send(err);
+            console.log(err);
         }
         else {
             req.flash('success', 'Successfully disapproved!');
@@ -446,7 +452,7 @@ router.get('/categories/edit', ensureLoggedIn('/users/login'), isAdmin,function(
     var type = req.query.type;
     TypesModel.update({_id:ObjectId(id)}, {$set:{type:type}},{}, function(err, next){
         if(err){
-            res.send(err);
+            console.log(err);
         }
         else {
             TypesModel.find({}, function (error, results) {
@@ -517,210 +523,198 @@ function isManager(req, res, next) {
 };
 
 function informUser(req, res, id) {
-  console.log("inform user");
-  AlertsModel.findOne(function(err, results){
-    if(err) {
-      console.log(err);
-    }
-    if (results == null) {
-      req.flash('error', 'Admin did not add an inform email sender! This operation will not inform any user.');
-      res.location('/manage/events');
-      res.redirect('/manage/events');      
-    } else {
-      var adminPw = results.password;
-      var adminEmail = results.account;
-      console.log('password: ' + adminPw);
-      console.log('email: ' + adminEmail);
-      var server  = email.server.connect({
-        user:  adminEmail, 
-        password: adminPw,
-        host:  "academiacentral.org", 
-        tls: {ciphers: "SSLv3"}
-      });
-      // var transporter = nodemailer.createTransport(smtpConfig);
-      // var server  = email.server.connect({
-      //   host: "smtp.academiacentral.org",
-      //   port: 465,
-      //   auth: {user: adminEmail, password: adminPw},
-      //   ssl: true     
-      // });
-
-      EventsModel.findById(id, function(err, events){
+    console.log("inform user");
+    AlertsModel.findOne(function(err, results){
         if(err) {
-          console.log(err);
+            console.log(err);
         }
-        if(events.approved == 3) { //revise
-          var message = {
-            text:  "Hello " + events.userName + ", you have an event to revise. Please log in your eventapp account " +
-             "to get detail information. "
-             + "\n\n\n" + "Regards," + "\n" + "event.academiacentral.org",
-            from:  "event.academiacentral.org <" + adminEmail + ">", 
-            to:    events.userName + "<" + events.userEmail + ">",
-            cc:    "",
+        if (results == null) {
+            req.flash('error', 'Admin did not add an inform email sender! This operation will not inform any user.');     
+        } else {
+            var adminPw = results.password;
+            var adminEmail = results.account;
+            console.log('password: ' + adminPw);
+            console.log('email: ' + adminEmail);
+            var server = email.server.connect({
+                user:  adminEmail, 
+                password: adminPw,
+                host:  "academiacentral.org", 
+                tls: {ciphers: "SSLv3"}
+            });
 
-            subject: "Revision Request"
-          };
+            EventsModel.findById(id, function(err, events){
+                if(err) {
+                    console.log(err);
+                }
+                else if(events.approved == 3) { //revise
+                    var message = {
+                        text:  "Hello " + events.userName + ", you have an event to revise. Please log in your eventapp account " +
+                         "to get detail information. "
+                         + "\n\n\n" + "Regards," + "\n" + "event.academiacentral.org",
+                        from:  "event.academiacentral.org <" + adminEmail + ">", 
+                        to:    events.userName + "<" + events.userEmail + ">",
+                        cc:    "",
 
-          server.send(message, function(err, message) {
-            if (err) {
-              console.log(err);
-            }
-            else {
-              console.log(message);
-              req.flash('success', 'Successfully ask for revision!');
-              res.location('/manage/events');
-              res.redirect('/manage/events');
-            }
-          });
+                        subject: "Revision Request"
+                    };
+
+                    server.send(message, function(err, message) {
+                        if (err) {
+                            console.log(err);
+                        }
+                        else {
+                            console.log(message);
+                            req.flash('success', 'Successfully ask for revision!');
+                        }
+                    });
+                }
+                else if(events.approved == 1) { //approved
+                    var message = {
+                        text:  "Hello " + events.userName + ", you hava an event approved. You can log in your eventapp account " +
+                         "to get detail information." 
+                         + "\n\n\n" + "Regards," + "\n" + "event.academiacentral.org",
+                        from:  "event.academiacentral.org <" + adminEmail + ">", 
+                        to:    events.userName + "<" + events.userEmail + ">",
+                        cc:    "",
+                        subject: "Event Approved"
+                    };
+
+                    server.send(message, function(err, message) {
+                        if (err) {
+                            console.log(err);
+                        }
+                        else {
+                            console.log(message);
+                            req.flash('success', 'Successfully approve an event!');
+                        }
+                    });   
+                }
+            });
         }
-        else if(events.approved == 1) { //approved
-          var message = {
-            text:  "Hello " + events.userName + ", you hava an event approved. You can log in your eventapp account " +
-             "to get detail information." 
-             + "\n\n\n" + "Regards," + "\n" + "event.academiacentral.org",
-            from:  "event.academiacentral.org <" + adminEmail + ">", 
-            to:    events.userName + "<" + events.userEmail + ">",
-            cc:    "",
-            subject: "Event Approved"
-          };
-
-          transporter.sendMail(message, function(err, message) {
-            if (err) {
-              console.log(err);
-            }
-            else {
-              console.log(message);
-              req.flash('success', 'Successfully approve an event!');
-              res.location('/manage/events');
-              res.redirect('/manage/events');
-            }
-          });   
-        }
-      });
-    }
-  });
+    });
 
   // send the message and get a callback with an error or details of the message that was sent
 
 }
 
 function alertUser(newEvent) {
-  console.log("alert User");
+    console.log("alert User");
 
-  AlertsModel.findOne(function(err, emails){
-    if(err) {
-      console.log(err);
-    }
-    if (emails == null) {
-    }
-    else {
-      var adminEmail = emails.account;
-      var adminPw = emails.password;
-      var name = newEvent.name;
-      var type = newEvent.type;
-      var keywords = newEvent.keywords;
-      var region = newEvent.region;
-      var country = newEvent.country;
-      var state = newEvent.state;
-      var city = newEvent.city;
-      var startDate = newEvent.startDate;
-      var endDate = newEvent.endDate;
-      var website = newEvent.website;
-      var deadline = newEvent.deadline;
-      var description = newEvent.description;
+    AlertsModel.findOne(function(err, emails){
+        if(err) {
+            console.log(err);
+        }
+        if (emails == null) {
+            req.flash('error', 'Admin did not add an inform email sender! This operation will not inform any user.');          
+        }
+        else {
+            var adminEmail = emails.account;
+            var adminPw = emails.password;
+            var name = newEvent.name;
+            var type = newEvent.type;
+            var keywords = newEvent.keywords;
+            var region = newEvent.region;
+            var country = newEvent.country;
+            var state = newEvent.state;
+            var city = newEvent.city;
+            var startDate = newEvent.startDate;
+            var endDate = newEvent.endDate;
+            var website = newEvent.website;
+            var deadline = newEvent.deadline;
+            var description = newEvent.description;
 
-      if(!name) {
-        var nameStr = {};
-      }
-      else {
-        nameStr = {$or: [{'name': name}, {'name': ""}]};
-      }
-      if(!type){
-        var typeStr = {};
-      }
-      else{
-        var typeStr = {$or: [{'type': type}, {'type': ""}]};
-      }
-      console.log(keywords);
-      if(keywords.length == 1 && !keywords[0]){
-        var keywordsStr = {};
-      }
-      else{
-        var keywordsStr = {$or: [{'keywords': {$in:keywords}}, {'keywords' : ""} ]};//or
-        //var keywordsStr = {'keywords': {$all:keywords}};//and
-      }
-      if(!region){
-        var regionStr = {};
-      }
-      else{
-        var regionStr = {$or: [{'region' : region}, {'region': ""}, {'region': null}]};
-      }   
-      if(!country){
-        var countryStr = {};
-      }
-      else{
-        var countryStr = {$or: [{'country' : country}, {'country': ""}, {'country': null}]};
-      }
-      if(!state){
-        var stateStr = {};
-      }
-      else{
-        var stateStr = {$or: [{'state' : state}, {'state': ""}, {'state': null}]};
-      }
-      if(!city){
-        var cityStr = {};
-      }
-      else{
-        var cityStr = {$or: [{'city' : city}, {'city': ""}]};
-      }
-      if(!startDate){
-        var startDateStr = {};
-      }
-      else{
-        var startDateStr = {$or: [{'startDate': {$lte:startDate}}, {'startDate': ""}]};
-      }
-      if(!endDate){
-        var endDateStr = {};
-      }
-      else{
-        var endDateStr = {$or: [{'endDate' : {$gte:endDate}}, {'endDate': ""}]};
-      }
-      SubsModel.find({$and: [nameStr, typeStr, regionStr, countryStr, stateStr, cityStr, startDateStr, endDateStr, keywordsStr]}, function(err, results){
-        console.log('user number' + results.length);
-
-        var server  = email.server.connect({
-          user:  adminEmail, 
-          password: adminPw,
-          host:  "academiacentral.org", 
-          tls: {ciphers: "SSLv3"}
-        });
-        results.forEach(function(result){
-
-          var message = {
-            text:  "Hello " + result.userName + ", \n There is a new event match your subscription. Below is the detailed information. \n" + 
-            "Event name: " + name + "\n" + "Event type: " + type + "\n" + "Region: " + region + "\n" +
-            "Country: " + country + "\n" + "State: " + state + "\n" + "City: " + city + "\n" + "Date: " +
-            startDate + "~" + endDate + "\n" + "Abstract Deadline: " + deadline + "\n" + 
-            "Description: " + description + "\n" + "keywords: " + keywords 
-            + "\n\n\n" + "Regards," + "\n" + "event.academiacentral.org",
-            from:  "event.academiacentral.org <" + adminEmail + ">", 
-            to:    result.userName + " <" + result.userEmail + ">",
-            cc:    "",
-            subject: "Event Subscription Alert"
-          };
-
-          // send the message and get a callback with an error or details of the message that was sent
-          server.send(message, function(err, message) { 
-            if (err) {
-              console.log(err); 
-            } else {
-              console.log(message);
+            if(!name) {
+                var nameStr = {};
             }
-          });
-        });       
-      });
-    }
-  });
+            else {
+                nameStr = {$or: [{'name': name}, {'name': ""}]};
+            }
+            if(!type){
+                var typeStr = {};
+            }
+            else{
+                var typeStr = {$or: [{'type': type}, {'type': ""}]};
+            }
+            if(keywords.length == 1 && !keywords[0]){
+                var keywordsStr = {};
+            }
+            else{
+                var keywordsStr = {$or: [{'keywords': {$in:keywords}}, {'keywords' : ""} ]};//or
+            //var keywordsStr = {'keywords': {$all:keywords}};//and
+            }
+            if(!region){
+                var regionStr = {};
+            }
+            else{
+                var regionStr = {$or: [{'region' : region}, {'region': ""}, {'region': null}]};
+            }   
+            if(!country){
+                var countryStr = {};
+            }
+            else{
+                var countryStr = {$or: [{'country' : country}, {'country': ""}, {'country': null}]};
+            }
+            if(!state){
+                var stateStr = {};
+            }
+            else{
+                var stateStr = {$or: [{'state' : state}, {'state': ""}, {'state': null}]};
+            }
+            if(!city){
+                var cityStr = {};
+            }
+            else{
+                var cityStr = {$or: [{'city' : city}, {'city': ""}]};
+            }
+            if(!startDate){
+                var startDateStr = {};
+            }
+            else{
+                var startDateStr = {$or: [{'startDate': {$lte:startDate}}, {'startDate': ""}]};
+            }
+            if(!endDate){
+                var endDateStr = {};
+            }
+            else{
+                var endDateStr = {$or: [{'endDate' : {$gte:endDate}}, {'endDate': ""}]};
+            }
+            SubsModel.find({$and: [nameStr, typeStr, regionStr, countryStr, stateStr, cityStr, startDateStr, endDateStr, keywordsStr]}, function(err, results){
+                console.log('user number' + results.length);
+
+                var server = email.server.connect({
+                    user:  adminEmail, 
+                    password: adminPw,
+                    host:  "academiacentral.org", 
+                    tls: {ciphers: "SSLv3"}
+                });
+
+                results.forEach(function(result){
+                    var message = {
+                        text:  "Hello " + result.userName + ", \n There is a new event match your subscription. Below is the detailed information. \n" + 
+                        "Event name: " + name + "\n" + "Event type: " + type + "\n" + "Region: " + region + "\n" +
+                        "Country: " + country + "\n" + "State: " + state + "\n" + "City: " + city + "\n" + "Date: " +
+                        startDate + "~" + endDate + "\n" + "Abstract Deadline: " + deadline + "\n" + 
+                        "Description: " + description + "\n" + "keywords: " + keywords 
+                        + "\n\n\n" + "Regards," + "\n" + "event.academiacentral.org",
+                        from:  "event.academiacentral.org <" + adminEmail + ">", 
+                        to:    result.userName + " <" + result.userEmail + ">",
+                        cc:    "",
+                        subject: "Event Subscription Alert"
+                    };
+
+                // send the message and get a callback with an error or details of the message that was sent
+                    server.send(message, function(err, message) { 
+                        if (err) {
+                            console.log(err); 
+                        } else {
+                            console.log(message);
+                        }
+                    });
+                }); 
+    
+            });
+        }
+    });
 }
 
 
