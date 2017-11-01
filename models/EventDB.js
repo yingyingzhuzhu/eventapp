@@ -73,6 +73,9 @@ var eventsSchema = new mongoose.Schema({
 	},
 	userEmail: {
 		type: String
+	},
+	inputDate: {
+		type: String
 	}
 });
 
