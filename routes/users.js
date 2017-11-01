@@ -145,6 +145,20 @@ router.post('/addEvent', function(req, res){
 	var approved = 0;//0:not check yet; 1:approve; 2:disapprove\
 	var userName = req.user.name;
 	var userEmail = req.user.email;
+	var today = new Date();
+	var dd = today.getDate();
+	var mm = today.getMonth()+1; //January is 0!
+	var yyyy = today.getFullYear();
+
+	if(dd<10) {
+	    dd = '0'+dd
+	} 
+
+	if(mm<10) {
+	    mm = '0'+mm
+	} 
+
+	today = yyyy + '-' + mm + '-' + dd;
 
 
 
@@ -188,7 +202,8 @@ router.post('/addEvent', function(req, res){
 		   keywords: keywords,
 		   approved: approved,
 		   userName: userName,
-		   userEmail: userEmail
+		   userEmail: userEmail,
+		   inputDate: today
 	}
 
 		// bcrypt.genSalt(10, function(err, salt){
@@ -199,7 +214,7 @@ router.post('/addEvent', function(req, res){
 			//add to event
 	EventsModel.create(newEvent, function(err, doc){
 	if(err){
-		res.send(err);
+		console.log(err);
 	}
 	else{
 		console.log('Event added');
