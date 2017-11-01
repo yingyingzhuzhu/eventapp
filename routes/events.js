@@ -30,13 +30,12 @@ router.post('/', function (req, res, next) {
 	var startDate = req.body.startDate;
 	var endDate = req.body.endDate;
 	var approved = 1;
-	//delete out-of-date events
-	deleteOutDateEvents(startDate);
+	var datePosted = "";
 
 	//search
 	searchEvents(res, req.user, limit, currentPage, type, 
-		keywords, region, country, state, startDate, endDate, approved);	
-
+		keywords, region, country, state, startDate, endDate, datePosted, approved);	
+	//next();
 });
 
 //Events - GET
@@ -64,17 +63,24 @@ router.get( "/" , function ( req , res , err ) {
 	var state = req.query.state.trim();
 	var startDate = req.query.startDate.trim();
 	var endDate = req.query.endDate.trim();
+	if(req.query.datePosted != null){
+		var datePosted = req.query.datePosted.trim();
+	}
+	else{
+		var datePosted = "";
+	}
+	
+	
 	var approved = 1;
-	//delete out-of-date events
-	deleteOutDateEvents(startDate);
+	
 	//search
 	searchEvents(res, req.user, limit, currentPage, type, keywords, 
-		region, country, state, startDate, endDate, approved);	
+		region, country, state, startDate, endDate, datePosted, approved);	
+	
 });
 
 
-function searchEvents(res, user, limit, currentPage, type, keywords, region, country, state, startDate, endDate, approved)
-{//search
+function searchEvents(res, user, limit, currentPage, type, keywords, region, country, state, startDate, endDate, datePosted, approved){
 	if(!type){
 		var typeStr = {};
 	}
@@ -118,9 +124,32 @@ function searchEvents(res, user, limit, currentPage, type, keywords, region, cou
 	else{
 		var endDateStr = {'endDate' : {$lte:endDate}};
 	}
+	if(!datePosted){
+		var postDateStr = {};
+	}
+	else{
+		var currentDate = new Date();
+		currentDate.setDate(currentDate.getDate()-datePosted-1);
+		var dd = currentDate.getDate();
+		var mm = currentDate.getMonth()+1; //January is 0!
+		var yyyy = currentDate.getFullYear();
+
+		if(dd<10) {
+		    dd = '0'+dd
+		} 
+
+		if(mm<10) {
+		    mm = '0'+mm
+		} 
+
+		currentDate = yyyy + '-' + mm + '-' + dd;
+		var postDateStr = {'postDate' : {$gte:currentDate}};
+		//console.log("post date: " +currentDate);
+	}
+	
 	var approvedStr = {'approved' : 1};
 
-    EventsModel.find({$and: [typeStr, keywordsStr, regionStr, countryStr, stateStr, startDateStr, endDateStr, approvedStr]}, function(err, rs){
+    EventsModel.find({$and: [typeStr, keywordsStr, regionStr, countryStr, stateStr, startDateStr, endDateStr, postDateStr, approvedStr]}, function(err, rs){
     	if (err) {
             res.send(err);
         } else{
@@ -133,7 +162,7 @@ function searchEvents(res, user, limit, currentPage, type, keywords, region, cou
             if (totalPage != 0 && currentPage > totalPage) {
                 currentPage = totalPage;
             }
-            var query = EventsModel.find({$and: [typeStr, keywordsStr, regionStr, countryStr, stateStr, startDateStr, endDateStr, approvedStr]});
+            var query = EventsModel.find({$and: [typeStr, keywordsStr, regionStr, countryStr, stateStr, startDateStr, endDateStr, postDateStr, approvedStr]});
             query.skip((currentPage - 1) * limit);
             query.limit(limit);
             query.sort('-startDate').exec(function(err, results) { 
@@ -144,33 +173,13 @@ function searchEvents(res, user, limit, currentPage, type, keywords, region, cou
 					res.render('events', {title:'Search Results', 
             		typeResults: typeResults, type:type, keywords:keywords, 
             		region:region, country:country, state:state, 
-            		startDate:startDate, endDate:endDate, 
+            		startDate:startDate, endDate:endDate, datePosted:datePosted,
             		totalPage:totalPage, currentPage:currentPage, 
             		results:results, totallength:totallength, user: user});
 				});
             });
         } 
 	});
-}
-function deleteOutDateEvents(startDate)
-{
-	//delete out-of-date events
-	var today = new Date();
-	var dd = today.getDate();
-	var mm = today.getMonth()+1; //January is 0!
-	var yyyy = today.getFullYear();
-
-	if(dd<10) {
-	    dd = '0'+dd
-	} 
-
-	if(mm<10) {
-	    mm = '0'+mm
-	} 
-
-	today =  yyyy + '-' + mm + '-' + dd;
-	//console.log(today);
-	EventsModel.remove({'startDate': {$lt:today}})
 }
 
 module.exports = router;

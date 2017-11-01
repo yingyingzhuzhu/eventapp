@@ -50,7 +50,8 @@
     
 <div class="container">
       <form method="post" action="/manage/events/details" class="form-signin">
-        <h2 class="form-signin-heading">Edit Events</h2>
+        <h2 class="form-signin-heading">Edit Events</h2>（Created on <%=event.inputDate%> by <%=event.userName%>）
+        <br>
         <!-- <label>ID</label> -->
         <label class="hid" id="id_1" ><%=event.id%></label>
         <input class="hid" type="text" name="id" class="form-control" value="<%= (!!event.id)?event.id:'' %>">

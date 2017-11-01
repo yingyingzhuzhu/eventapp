@@ -76,6 +76,9 @@ var eventsSchema = new mongoose.Schema({
 	},
 	inputDate: {
 		type: String
+	},
+	postDate: {
+		type: String
 	}
 });
 
