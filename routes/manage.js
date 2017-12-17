@@ -1,3 +1,4 @@
+//I choose this code, because I think it is relavant with the position I am apply. This is a piece of code of the website http://event.academiacentral.org built when I was an intern in ANAHEI. It involves Node.js, Express.js and MongoDB.
 var express = require('express');
 var router = express.Router();
 var mongojs = require('mongojs');
